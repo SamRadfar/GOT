@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive Game of Thrones character guide &amp; family tree — explore every house, relationship, and key event from all 8 seasons.">
+  <meta name="theme-color" content="#c8a951">
+  <meta property="og:title" content="Game of Thrones Family Tree">
+  <meta property="og:description" content="Interactive character guide &amp; house relationships">
+  <meta property="og:image" content="/og-image.png">
+  <meta property="og:url" content="https://game-of-thrones-tree.vercel.app/">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Game of Thrones — Family Tree &amp; Character Guide</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip link -->
+  <a class="skip-link" href="#sectionsContainer">Skip to content</a>
+
+  <!-- ========== HEADER ========== -->
+  <header class="hero">
+    <h1>Game of Thrones</h1>
+    <p>Interactive family tree &amp; character guide — all 8 seasons</p>
+    <div class="sword-divider" aria-hidden="true"></div>
+  </header>
+
+  <!-- ========== NAV ========== -->
+  <nav class="nav" aria-label="House navigation">
+    <div class="nav-inner">
+      <button class="nav-btn active" data-house="all" onclick="showSection('all')">⚔ All Houses</button>
+      <button class="nav-btn" data-house="stark"
+        style="--btn-color:var(--stark);--btn-text:#fff"
+        onclick="showSection('stark')">🐺 Stark</button>
+      <button class="nav-btn" data-house="lannister"
+        style="--btn-color:var(--lannister);--btn-text:#1a1a24"
+        onclick="showSection('lannister')">🦁 Lannister</button>
+      <button class="nav-btn" data-house="targaryen"
+        style="--btn-color:var(--targaryen);--btn-text:#fff"
+        onclick="showSection('targaryen')">🐉 Targaryen</button>
+      <button class="nav-btn" data-house="baratheon"
+        style="--btn-color:var(--baratheon);--btn-text:#1a1a24"
+        onclick="showSection('baratheon')">🦌 Baratheon</button>
+      <button class="nav-btn" data-house="greyjoy"
+        style="--btn-color:var(--greyjoy);--btn-text:#fff"
+        onclick="showSection('greyjoy')">🦑 Greyjoy</button>
+      <button class="nav-btn" data-house="tyrell"
+        style="--btn-color:var(--tyrell);--btn-text:#fff"
+        onclick="showSection('tyrell')">🌹 Tyrell</button>
+      <button class="nav-btn" data-house="martell"
+        style="--btn-color:var(--martell);--btn-text:#fff"
+        onclick="showSection('martell')">☀️ Martell</button>
+      <button class="nav-btn" data-house="tully"
+        style="--btn-color:var(--tully);--btn-text:#fff"
+        onclick="showSection('tully')">🐟 Tully &amp; Arryn</button>
+      <button class="nav-btn" data-house="blackfyre"
+        style="--btn-color:var(--blackfyre);--btn-text:#d44"
+        onclick="showSection('blackfyre')">🐉 Blackfyre</button>
+      <button class="nav-btn" data-house="keyfigures"
+        onclick="showSection('keyfigures')">⚔️ Key Figures</button>
+      <button class="nav-btn" data-house="locations"
+        onclick="showSection('locations')">🗺 Locations</button>
+      <button class="nav-btn" data-house="overview"
+        onclick="toggleOverview()">👁 Overview</button>
+      <button class="nav-btn" data-house="connections"
+        onclick="toggleConnections()">🔗 Connections</button>
+      <button class="nav-btn" data-house="snapshot"
+        onclick="toggleSnapshot()">📅 Season Snapshot</button>
+    </div>
+  </nav>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main>
+    <div class="container">
+
+      <!-- Spoiler shield bar -->
+      <div class="spoiler-bar" role="region" aria-label="Spoiler shield">
+        <span class="spoiler-label" aria-hidden="true">🛡</span>
+        <label for="seasonPicker" class="spoiler-label">Spoiler Shield:</label>
+        <select id="seasonPicker" aria-label="Select how many seasons you have watched"
+          onchange="applySpoilerFilter(+this.value)">
+          <option value="0">Haven't started</option>
+          <option value="1">Season 1</option>
+          <option value="2">Season 2</option>
+          <option value="3">Season 3</option>
+          <option value="4">Season 4</option>
+          <option value="5">Season 5</option>
+          <option value="6">Season 6</option>
+          <option value="7">Season 7</option>
+          <option value="8">All seasons ✓</option>
+        </select>
+        <span class="spoiler-hint">We hide deaths &amp; reveals you haven't seen yet</span>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-bar" id="searchBar" role="search">
+        <div class="search-field">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="8.5" cy="8.5" r="5.5"/><path d="M15 15l-3.5-3.5"/>
+          </svg>
+          <input type="search" id="searchInput" placeholder="Search characters, houses, actors…"
+            aria-label="Search characters"
+            oninput="debouncedSearch(this.value)"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <button class="search-clear" onclick="clearSearch()" aria-label="Clear search">✕</button>
+        </div>
+        <div class="search-results-count" id="searchCount" aria-live="polite" aria-atomic="true"></div>
+      </div>
+
+      <!-- Relation Finder -->
+      <div class="relation-finder-toggle">
+        <button onclick="toggleRelationFinder()" aria-controls="relationFinder" aria-expanded="false">
+          🔍 How are they related?
+        </button>
+      </div>
+      <div class="relation-finder" id="relationFinder" role="region" aria-label="Relationship finder">
+        <div class="rf-row">
+          <select id="rfChar1" aria-label="First character">
+            <option value="">Select character…</option>
+          </select>
+          <span class="rf-arrow" aria-hidden="true">↔</span>
+          <select id="rfChar2" aria-label="Second character">
+            <option value="">Select character…</option>
+          </select>
+          <button onclick="findRelation()" style="padding:.35rem .7rem;border-radius:var(--radius-sm);font-size:.75rem;border:1px solid var(--border);color:var(--gold);background:var(--gold-glow)">Find</button>
+        </div>
+        <div class="rf-result" id="rfResult" aria-live="polite"></div>
+      </div>
+
+      <!-- Overview panel (hidden by default) -->
+      <div class="overview-panel" id="overviewPanel" style="display:none" role="region" aria-label="House overview"></div>
+
+      <!-- Connections panel (hidden by default) -->
+      <div class="connections-panel" id="connectionsPanel" style="display:none" role="region" aria-label="Cross-house connections"></div>
+
+      <!-- Season snapshot panel (hidden by default) -->
+      <div class="snapshot-panel" id="snapshotPanel" style="display:none" role="region" aria-label="Season snapshot"></div>
+
+      <!-- House sections (rendered by app.js) -->
+      <div id="sectionsContainer"></div>
+
+    </div><!-- /.container -->
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <p>Game of Thrones Family Tree &amp; Character Guide</p>
+    <p style="margin-top:.35rem">All character data from HBO's <em>Game of Thrones</em> · Built by <a href="https://x.com/triplethata" target="_blank" rel="noopener">@triplethata</a></p>
+  </footer>
+
+  <!-- ========== BACK TO TOP ========== -->
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+
+  <!-- ========== MOBILE FABs ========== -->
+  <button class="overview-fab" id="overviewFab" onclick="toggleOverview()" aria-label="Toggle overview" aria-pressed="false">👁</button>
+  <button class="connections-fab" id="connectionsFab" onclick="toggleConnections()" aria-label="Toggle connections" aria-pressed="false">🔗</button>
+  <button class="snapshot-fab" id="snapshotFab" onclick="toggleSnapshot()" aria-label="Toggle season snapshot" aria-pressed="false">📅</button>
+
+  <!-- ========== MODAL ========== -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Character details"
+    onclick="closeModal(event)">
+    <div class="modal">
+      <!-- Drag handle (mobile) -->
+      <div class="modal-handle" aria-hidden="true"></div>
+
+      <!-- Sticky toolbar -->
+      <div class="modal-toolbar" aria-hidden="true">
+        <button class="modal-back" id="modalBack" onclick="modalGoBack()" aria-label="Go back">←</button>
+        <button class="modal-close" id="modalClose" onclick="closeModalDirect()" aria-label="Close">✕</button>
+      </div>
+
+      <!-- Gallery -->
+      <div class="modal-gallery" id="modalGallery">
+        <div class="gallery-track" id="galleryTrack"></div>
+        <button class="gallery-nav prev" onclick="gallerySlide(-1)" aria-label="Previous image">‹</button>
+        <button class="gallery-nav next" onclick="gallerySlide(1)" aria-label="Next image">›</button>
+        <div class="gallery-counter" id="galleryCounter"></div>
+      </div>
+      <div class="gallery-dots" id="galleryDots" role="tablist" aria-label="Gallery images"></div>
+
+      <!-- Character header -->
+      <div class="modal-header">
+        <div class="house-badge" id="modalHouseBadge"></div>
+        <h3 id="modalName"></h3>
+        <p class="modal-title" id="modalTitle"></p>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+        <!-- Status + actor -->
+        <div class="detail-grid" id="modalDetails"></div>
+
+        <!-- Relations -->
+        <div class="relations-section" id="modalRelations"></div>
+
+        <!-- Bio -->
+        <div class="bio" id="modalBio"></div>
+        <button class="bio-toggle" id="bioToggle" onclick="toggleBio()" style="display:none">Read more</button>
+      </div>
+
+      <!-- Share row -->
+      <div class="share-row" id="modalShare"></div>
+    </div>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
